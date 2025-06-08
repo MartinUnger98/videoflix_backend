@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'genres_app',
-    'videos_app',
+    'videos_app.apps.VideosAppConfig',
     'users_app',  
 ]
 
