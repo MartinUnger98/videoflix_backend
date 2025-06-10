@@ -8,6 +8,8 @@ from rest_framework import status
 from .serializers import RegisterSerializer, EmailAuthTokenSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
+from users_app.signals import password_reset_requested
+
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -57,3 +59,46 @@ class CustomLoginView(APIView):
             "user_id": user.id
         })
         
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response({"detail": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"detail": "If an account with this email exists, a reset link has been sent."})
+
+        password_reset_requested.send(sender=self.__class__, user=user)
+
+        return Response({"detail": "If an account with this email exists, a reset link has been sent."})
+        
+        
+class PasswordResetCompleteView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get("uidb64")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not (uidb64 and token and new_password):
+            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+            return Response({"error": "Invalid user ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not default_token_generator.check_token(user, token):
+            return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"message": "Password has been reset successfully."})
