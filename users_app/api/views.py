@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer, EmailAuthTokenSerializer
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from users_app.signals import password_reset_requested
 
 
@@ -102,3 +102,10 @@ class PasswordResetCompleteView(APIView):
         user.save()
 
         return Response({"message": "Password has been reset successfully."})
+    
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({"message": "Logged out successfully."}, status=status.HTTP_200_OK)
