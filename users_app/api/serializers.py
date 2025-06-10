@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
-from rest_framework.serializers import ValidationError, CharField, EmailField, ModelSerializer
+from rest_framework.serializers import ValidationError, CharField, EmailField, ModelSerializer, Serializer
 import re
+from django.contrib.auth import authenticate
 
 class RegisterSerializer(ModelSerializer):
     password = CharField(write_only=True)
@@ -28,3 +29,26 @@ class RegisterSerializer(ModelSerializer):
             is_active=False
         )
         return user
+    
+class EmailAuthTokenSerializer(Serializer):
+    email = EmailField()
+    password = CharField()
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise ValidationError("Invalid email or password.")
+
+            user = authenticate(username=user.username, password=password)
+            if not user:
+                raise ValidationError("Invalid email or password.")
+        else:
+            raise ValidationError("Both email and password are required.")
+
+        attrs["user"] = user
+        return attrs
