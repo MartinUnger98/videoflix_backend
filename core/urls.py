@@ -25,4 +25,5 @@ urlpatterns = [
     path('django-rq/', include('django_rq.urls')),
     path('api/', include('users_app.api.urls')),
     path('api/', include('genres_app.api.urls')),
+    path('api/', include('videos_app.api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
