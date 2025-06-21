@@ -5,6 +5,12 @@ from videos_app.models import Video
 
 
 def process_video_file(video_id):
+    """
+    Background task to:
+    - Generate resolution-specific video files (120p, 360p, 720p, 1080p)
+    - Extract a thumbnail from second 3 of the video
+    - Convert the video to HLS format for adaptive streaming
+    """
     video = Video.objects.get(id=video_id)
     input_path = video.video_file.path
     filename_base = os.path.splitext(os.path.basename(input_path))[0]
@@ -32,7 +38,6 @@ def process_video_file(video_id):
         subprocess.run(cmd, check=True)
         setattr(video, f'file_{label}', f'videos/{label}/{filename_base}_{label}.mp4')
 
-    # Thumbnail (bei Sekunde 3)
     thumbnail_dir = os.path.join(settings.MEDIA_ROOT, 'thumbnails')
     os.makedirs(thumbnail_dir, exist_ok=True)
     thumbnail_path = os.path.join(thumbnail_dir, f'{filename_base}.jpg')
@@ -47,7 +52,6 @@ def process_video_file(video_id):
 
     video.thumbnail = f'thumbnails/{filename_base}.jpg'
 
-    # HLS-Konvertierung
     hls_dir = os.path.join(settings.MEDIA_ROOT, 'videos/hls', filename_base)
     os.makedirs(hls_dir, exist_ok=True)
 

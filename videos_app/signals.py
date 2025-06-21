@@ -7,6 +7,10 @@ import django_rq
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
+    """
+    After a video is saved, this signal checks if it was newly created.
+    If so, it enqueues a background task using Django RQ to process the video.
+    """
     print("Video post save signal triggered")
     if created:
         print(f"New video created: {instance.title}")
@@ -15,5 +19,9 @@ def video_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Video)
 def video_post_delete(sender, instance, **kwargs):
+    """
+    Deletes the associated video file from disk when a Video model is deleted.
+    Prevents orphaned media files.
+    """
     if instance.video_file and os.path.isfile(instance.video_file.path):
         os.remove(instance.video_file.path)

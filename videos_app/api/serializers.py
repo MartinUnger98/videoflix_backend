@@ -4,8 +4,13 @@ from genres_app.models import Genre
 
 
 class VideoSerializer(serializers.ModelSerializer):
+    """
+    Serializes video data for API output and input.
+    Handles genre association and multi-quality video fields.
+    """
     genre = serializers.PrimaryKeyRelatedField(queryset=Genre.objects.all(), write_only=True)
     genre_name = serializers.StringRelatedField(source='genre', read_only=True)
+
     video_file = serializers.FileField()
     thumbnail = serializers.FileField(read_only=True)
 
@@ -13,7 +18,9 @@ class VideoSerializer(serializers.ModelSerializer):
     file_360p = serializers.FileField(read_only=True)
     file_720p = serializers.FileField(read_only=True)
     file_1080p = serializers.FileField(read_only=True)
+
     hls_playlist = serializers.CharField(read_only=True)
+
     class Meta:
         model = Video
         fields = [
@@ -34,6 +41,10 @@ class VideoSerializer(serializers.ModelSerializer):
 
 
 class VideoProgressSerializer(serializers.ModelSerializer):
+    """
+    Serializes user progress for a specific video.
+    Timestamp is in seconds. Automatically sets current user.
+    """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:

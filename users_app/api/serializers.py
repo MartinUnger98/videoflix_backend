@@ -4,6 +4,9 @@ import re
 from django.contrib.auth import authenticate
 
 class RegisterSerializer(ModelSerializer):
+    """
+    Handles user registration logic using Django's built-in User model.
+    """
     password = CharField(write_only=True)
     email = EmailField(required=True)
 
@@ -12,11 +15,18 @@ class RegisterSerializer(ModelSerializer):
         fields = ['email', 'password']
 
     def validate_email(self, value):
+        """
+        Ensures email is unique before allowing registration.
+        """
         if User.objects.filter(email=value).exists():
             raise ValidationError("This email already exists.")
         return value
 
     def create(self, validated_data):
+        """
+        Generates a User instance with a capitalized username derived from email.
+        The account is inactive by default until email confirmation.
+        """
         email = validated_data['email']
         username_raw = email.split('@')[0]
         parts = re.split(r"[.\-_:\\/]", username_raw)
@@ -31,10 +41,16 @@ class RegisterSerializer(ModelSerializer):
         return user
     
 class EmailAuthTokenSerializer(Serializer):
+    """
+    Authenticates a user using email and password.
+    """
     email = EmailField()
     password = CharField()
 
     def validate(self, attrs):
+        """
+        Validates email and password, returns the authenticated user.
+        """
         email = attrs.get("email")
         password = attrs.get("password")
 

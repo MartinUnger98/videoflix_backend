@@ -13,6 +13,10 @@ password_reset_requested = Signal()
 
 @receiver(post_save, sender=User)
 def send_verification_email(sender, instance, created, **kwargs):
+    """
+    Sends a verification email after user registration.
+    Triggered only if the new user is not active yet.
+    """
     if created and not instance.is_active:
         token = default_token_generator.make_token(instance)
         uid = urlsafe_base64_encode(force_bytes(instance.pk))
@@ -22,18 +26,23 @@ def send_verification_email(sender, instance, created, **kwargs):
         from_email = settings.DEFAULT_FROM_EMAIL
         to_email = instance.email
 
+        # Render HTML email template
         html_content = render_to_string("users_app/email_verification.html", {
             "username": instance.username,
             "activation_link": activation_link,
             "logo_url": "https://martin-unger.at/images/Capa_1.png"
         })
 
+        # Compose and send email
         email = EmailMultiAlternatives(subject, "", from_email, [to_email])
         email.attach_alternative(html_content, "text/html")
         email.send()
         
 @receiver(password_reset_requested)
 def send_password_reset_email(sender, user, **kwargs):
+    """
+    Sends a password reset email when password_reset_requested is triggered.
+    """
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     reset_link = f"{settings.FRONTEND_URL}/password-reset-confirm/{uid}/{token}/"

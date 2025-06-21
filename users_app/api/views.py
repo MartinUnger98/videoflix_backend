@@ -12,6 +12,9 @@ from users_app.signals import password_reset_requested
 
 
 class RegisterView(APIView):
+    """
+    Handles user registration. Accepts user data and creates a new user after validation.
+    """
     permission_classes = [AllowAny]
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -23,7 +26,7 @@ class RegisterView(APIView):
 
 class ActivateUserView(APIView):
     """
-    Activates a user's account via email link containing UID and token.
+    Activates a user's account using a token sent via email.
     """
     permission_classes = [AllowAny]
     def get(self, request, uidb64, token):
@@ -40,10 +43,13 @@ class ActivateUserView(APIView):
             user.is_active = True
             user.save()
             return Response({'message': 'Account successfully activated.'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'error': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)
         
 class CustomLoginView(APIView):
+    """
+    Custom login view that authenticates user via email and returns a token.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -60,6 +66,9 @@ class CustomLoginView(APIView):
         })
         
 class PasswordResetRequestView(APIView):
+    """
+    Handles password reset by triggering a signal to send reset instructions via email.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
