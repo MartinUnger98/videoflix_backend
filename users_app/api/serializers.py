@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework.serializers import ValidationError, CharField, EmailField, ModelSerializer, Serializer
 import re
 from django.contrib.auth import authenticate
+import uuid
+from django.db import IntegrityError
 
 class RegisterSerializer(ModelSerializer):
     """
@@ -23,22 +25,26 @@ class RegisterSerializer(ModelSerializer):
         return value
 
     def create(self, validated_data):
-        """
-        Generates a User instance with a capitalized username derived from email.
-        The account is inactive by default until email confirmation.
-        """
         email = validated_data['email']
         username_raw = email.split('@')[0]
         parts = re.split(r"[.\-_:\\/]", username_raw)
-        username = " ".join(part.capitalize() for part in parts if part.strip())
+        base_username = " ".join(part.capitalize() for part in parts if part.strip())
 
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=validated_data['password'],
-            is_active=False
-        )
-        return user
+        for _ in range(5):
+            unique_username = f"{base_username} {str(uuid.uuid4())[:8]}"
+            if not User.objects.filter(username=unique_username).exists():
+                try:
+                    user = User.objects.create_user(
+                        username=unique_username,
+                        email=email,
+                        password=validated_data['password'],
+                        is_active=False
+                    )
+                    return user
+                except IntegrityError:
+                    continue
+
+        raise ValidationError("Could not generate a unique username. Please try again.")
     
 class EmailAuthTokenSerializer(Serializer):
     """

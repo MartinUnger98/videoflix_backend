@@ -15,6 +15,10 @@ class RegisterTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(User.objects.filter(email='user@example.com').exists())
 
+        user = User.objects.get(email='user@example.com')
+        self.assertFalse(user.is_active)
+        self.assertTrue(user.username.startswith('User'))
+
     def test_register_duplicate_email(self):
         User.objects.create_user(username='existing', email='user@example.com', password='secret')
         response = self.client.post(self.url, {
