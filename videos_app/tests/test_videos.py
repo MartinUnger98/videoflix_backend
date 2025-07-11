@@ -10,6 +10,9 @@ from django.contrib.auth.models import User
 class VideoAPITests(APITestCase):
     def setUp(self):
         self.genre = Genre.objects.create(name="TestGenre")
+        self.user = User.objects.create_user(username='testuser', password='password123')
+        self.client.force_authenticate(user=self.user)
+
         self.url = reverse('video-list')
 
     def get_test_video_file(self):
@@ -67,12 +70,11 @@ class VideoAPITests(APITestCase):
         self.assertEqual(str(video), 'String Test')
     
     def test_video_progress_str_method(self):
-        user = User.objects.create_user(username='testuser')
         video = Video.objects.create(
             title='ForProgress',
             description='Test',
             video_file=self.get_test_video_file(),
             genre=self.genre
         )
-        progress = video.progress.create(user=user, timestamp=12.3)
+        progress = video.progress.create(user=self.user, timestamp=12.3)  # self.user statt neuen User
         self.assertIn("testuser", str(progress))
