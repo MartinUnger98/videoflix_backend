@@ -14,11 +14,6 @@ class VideoSerializer(serializers.ModelSerializer):
     video_file = serializers.FileField()
     thumbnail = serializers.FileField(read_only=True)
 
-    file_120p = serializers.FileField(read_only=True)
-    file_360p = serializers.FileField(read_only=True)
-    file_720p = serializers.FileField(read_only=True)
-    file_1080p = serializers.FileField(read_only=True)
-
     hls_playlist = serializers.CharField(read_only=True)
 
     class Meta:
@@ -29,10 +24,6 @@ class VideoSerializer(serializers.ModelSerializer):
             'description',
             'video_file',
             'thumbnail',
-            'file_120p',
-            'file_360p',
-            'file_720p',
-            'file_1080p',
             'hls_playlist',
             'genre',       
             'genre_name', 
