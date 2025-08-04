@@ -34,8 +34,14 @@ def send_verification_email(sender, instance, created, **kwargs):
         })
 
         # Compose and send email
-        email = EmailMultiAlternatives(subject, "", from_email, [to_email])
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="",
+            from_email=from_email,
+            to=[to_email]
+        )
         email.attach_alternative(html_content, "text/html")
+        print(">>> DEFAULT_FROM_EMAIL =", settings.DEFAULT_FROM_EMAIL)
         email.send()
         
 @receiver(password_reset_requested)
@@ -56,6 +62,12 @@ def send_password_reset_email(sender, user, **kwargs):
         "logo_url": "https://martin-unger.at/images/Capa_1.png"
     })
 
-    email = EmailMultiAlternatives(subject, "", from_email, [to_email])
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body="",
+        from_email=from_email,
+        to=[to_email]
+    )
     email.attach_alternative(html_content, "text/html")
+    print(">>> DEFAULT_FROM_EMAIL =", settings.DEFAULT_FROM_EMAIL)
     email.send()

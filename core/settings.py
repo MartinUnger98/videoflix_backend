@@ -71,6 +71,8 @@ CORS_ALLOWED_ORIGINS = [
   'http://localhost:5500',
   'http://localhost:4200',
   'http://127.0.0.1:4200',
+  'https://videoflix.martin-unger.at',
+  'https://videoflix-backend.martin-unger.at'
 ]
 
 
@@ -178,8 +180,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DEFAULT_FROM_EMAIL = "noreply@videoflix.com"
-FRONTEND_URL = "http://localhost:4200"
+FRONTEND_URL = "https://videoflix.martin-unger.at"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
