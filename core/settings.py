@@ -71,6 +71,8 @@ CORS_ALLOWED_ORIGINS = [
   'http://localhost:5500',
   'http://localhost:4200',
   'http://127.0.0.1:4200',
+  'https://videoflix.martin-unger.at',
+  'https://videoflix-backend.martin-unger.at'
 ]
 
 
